@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Обмен USDT - WebApp</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+  body {
+    font-family: 'Inter', sans-serif;
+    margin: 0; padding: 0;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  .app {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    width: 380px;
+    color: #1a1a1a;
+  }
+  header {
+    display: flex;
+    justify-content: space-around;
+    background: #1e3c72;
+    border-radius: 16px 16px 0 0;
+  }
+  header button {
+    flex: 1;
+    padding: 14px 0;
+    background: transparent;
+    border: none;
+    color: #f0f4f8;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  header button.active, header button:hover {
+    background: #2a5298;
+  }
+
+  main {
+    padding: 20px 30px 30px 30px;
+  }
+
+  /* Обмен (первый таб) */
+  .exchange-tab {
+    display: none;
+  }
+  .exchange-tab.active {
+    display: block;
+  }
+  .exchange-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  .exchange-buttons button {
+    flex: 1;
+    margin: 0 5px;
+    background: #1e3c72;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 10px 0;
+    cursor: pointer;
+  }
+  .course-info {
+    margin: 20px 0;
+    font-weight: bold;
+    font-size: 18px;
+    color: #2a5298;
+    text-align: center;
+  }
+  .menu-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .menu-buttons button {
+    background: #1e3c72;
+    color: white;
+    font-weight: 600;
+    padding: 8px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  /* Заявка (второй таб) */
+  .request-tab {
+    display: none;
+  }
+  .request-tab.active {
+    display: block;
+  }
+  .subtabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+  }
+  .subtabs button {
+    flex: 1;
+    margin: 0 5px;
+    padding: 10px 0;
+    border-radius: 10px;
+    border: 1px solid #1e3c72;
+    background: transparent;
+    color: #1e3c72;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .subtabs button.active {
+    background: #1e3c72;
+    color: white;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  label {
+    font-weight: bold;
+    margin: 8px 0 4px 0;
+  }
+  input {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+  button.submit-btn {
+    margin-top: 20px;
+    background: #1e3c72;
+    color: white;
+    font-weight: 700;
+    padding: 12px 0;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .message {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <button id="tab-exchange" class="active">Обмен</button>
+    <button id="tab-request">Заявка</button>
+  </header>
+  <main>
+    <!-- Вкладка Обмен -->
+    <section id="exchange" class="exchange-tab active">
+      <div class="exchange-buttons">
+        <button id="btn-buy-exchange">Купить</button>
+        <button id="btn-sell-exchange">Продать</button>
+      </div>
+      <div class="course-info" id="course-info">Курс: загружается...</div>
+      <div class="menu-buttons">
+        <button id="btn-all-orders">Все заявки</button>
+        <button id="btn-support">Поддержка</button>
+        <button id="btn-about">О нас</button>
+        <button id="btn-aml">AML проверка</button>
+        <button id="btn-exchange">Биржа Exchange</button>
+      </div>
+    </section>
+
+    <!-- Вкладка Заявка -->
+    <section id="request" class="request-tab">
+      <div class="subtabs">
+        <button id="subtab-buy" class="active">Купить</button>
+        <button id="subtab-sell">Продать</button>
+      </div>
+
+      <!-- Форма Купить -->
+      <form id="form-buy" class="request-form">
+        <label for="buy-amount">Сумма (в рублях):</label>
+        <input id="buy-amount" type="number" min="1" required />
+
+        <label for="buy-lastname">Фамилия:</label>
+        <input id="buy-lastname" type="text" required />
+
+        <label for="buy-firstname">Имя:</label>
+        <input id="buy-firstname" type="text" required />
+
+        <label for="buy-middlename">Отчество:</label>
+        <input id="buy-middlename" type="text" required />
+
+        <label for="buy-wallet">Адрес кошелька:</label>
+        <input id="buy-wallet" type="text" required />
+
+        <label for="buy-phone">Телефон (+7XXXXXXXXXX или 8XXXXXXXXXX):</label>
+        <input id="buy-phone" type="tel" pattern="^(\+7|8)\d{10}$" required />
+
+        <button type="submit" class="submit-btn">Отправить заявку на покупку</button>
+        <div class="message" id="message-buy"></div>
+      </form>
+
+      <!-- Форма Продать -->
+      <form id="form-sell" class="request-form" style="display:none;">
+        <label for="sell-amount">Сумма (в рублях):</label>
+        <input id="sell-amount" type="number" min="1" required />
+
+        <label for="sell-lastname">Фамилия:</label>
+        <input id="sell-lastname" type="text" required />
+
+        <label for="sell-firstname">Имя:</label>
+        <input id="sell-firstname" type="text" required />
+
+        <label for="sell-middlename">Отчество:</label>
+        <input id="sell-middlename" type="text" required />
+
+        <label for="sell-wallet">Адрес кошелька:</label>
+        <input id="sell-wallet" type="text" required />
+
+        <label for="sell-phone">Телефон (+7XXXXXXXXXX или 8XXXXXXXXXX):</label>
+        <input id="sell-phone" type="tel" pattern="^(\+7|8)\d{10}$" required />
+
+        <button type="submit" class="submit-btn">Отправить заявку на продажу</button>
+        <div class="message" id="message-sell"></div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<script>
+  // Переключение вкладок основного меню
+  const tabExchangeBtn = document.getElementById('tab-exchange');
+  const tabRequestBtn = document.getElementById('tab-request');
+  const exchangeSection = document.getElementById('exchange');
+  const requestSection = document.getElementById('request');
+
+  tabExchangeBtn.onclick = () => {
+    tabExchangeBtn.classList.add('active');
+    tabRequestBtn.classList.remove('active');
+    exchangeSection.classList.add('active');
+    requestSection.classList.remove('active');
+  };
+  tabRequestBtn.onclick = () => {
+    tabRequestBtn.classList.add('active');
+    tabExchangeBtn.classList.remove('active');
+    requestSection.classList.add('active');
+    exchangeSection.classList.remove('active');
+  };
+
+  // Переключение подкладок Заявка (Купить/Продать)
+  const subtabBuyBtn = document.getElementById('subtab-buy');
+  const subtabSellBtn = document.getElementById('subtab-sell');
+  const formBuy = document.getElementById('form-buy');
+  const formSell = document.getElementById('form-sell');
+
+  subtabBuyBtn.onclick = () => {
+    subtabBuyBtn.classList.add('active');
+    subtabSellBtn.classList.remove('active');
+    formBuy.style.display = 'flex';
+    formSell.style.display = 'none';
+  };
+  subtabSellBtn.onclick = () => {
+    subtabSellBtn.classList.add('active');
+    subtabBuyBtn.classList.remove('active');
+    formSell.style.display = 'flex';
+    formBuy.style.display = 'none';
+  };
+
+  // Получение курса с CoinGecko
+  async function fetchRate() {
+    try {
+      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=rub');
+      const data = await res.json();
+      const rate = data.tether.rub;
+      return rate;
+    } catch {
+      return null;
+    }
+  }
+
+  // Обновление курса на вкладке Обмен
+  async function updateCourse() {
+    const rate = await fetchRate();
+    const courseInfo = document.getElementById('course-info');
+    if (rate) {
+      courseInfo.textContent = `Курс USDT: Купить — ${(rate + 1).toFixed(2)} ₽, Продать — ${rate.toFixed(2)} ₽`;
+    } else {
+      courseInfo.textContent = 'Не удалось загрузить курс.';
+    }
+  }
+  updateCourse();
+
+  // Обработка отправки форм
+  function setupFormSubmit(formId, messageId, operation) {
+    const form = document.getElementById(formId);
+    const messageDiv = document.getElementById(messageId);
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const amount = form.querySelector('input[type=number]').value.trim();
+      const lastName = form.querySelector(`#${formId}-lastname`).value.trim();
+      const firstName = form.querySelector(`#${formId}-firstname`).value.trim();
+      const middleName = form.querySelector(`#${formId}-middlename`).value.trim();
+      const wallet = form.querySelector(`#${formId}-wallet`).value.trim();
+      const phone = form.querySelector(`#${formId}-phone`).value.trim();
+
+      if (!amount || !lastName || !firstName || !wallet || !phone) {
+        messageDiv.textContent = '❌ Пожалуйста, заполните все обязательные поля.';
+        messageDiv.style.color = 'red';
+        return;
+      }
+
+      if (!/^(\+7|8)\d{10}$/.test(phone)) {
+        messageDiv.textContent = '❌ Телефон должен быть в формате +7XXXXXXXXXX или 8XXXXXXXXXX.';
+        messageDiv.style.color = 'red';
+        return;
+      }
+
+      const data = {
+        operation,
+        amount,
+        lastName,
+        firstName,
+        middleName,
+        wallet,
+        phone
+      };
+
+      if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.sendData(JSON.stringify(data));
+        messageDiv.textContent = '✅ Заявка отправлена!';
+        messageDiv.style.color = 'green';
+        form.reset();
+      } else {
+        messageDiv.textContent = '❌ Откройте это приложение в Telegram.';
+        messageDiv.style.color = 'red';
+      }
+    });
+  }
+
+  setupFormSubmit('form-buy', 'message-buy', 'buy');
+  setupFormSubmit('form-sell', 'message-sell', 'sell');
+
+  // Обработка кнопок меню (заглушки)
+  document.getElementById('btn-all-orders').onclick = () => alert('Все заявки - в разработке');
+  document.getElementById('btn-support').onclick = () => alert('Поддержка - в разработке');
+  document.getElementById('btn-about').onclick = () => alert('О нас - в разработке');
+  document.getElementById('btn-aml').onclick = () => alert('AML проверка - в разработке');
+  document.getElementById('btn-exchange').onclick = () => alert('Биржа Exchange - в разработке');
+
+  // Кнопки Купить и Продать на вкладке Обмен для переключения на вкладку Заявка и нужную подкладку
+  document.getElementById('btn-buy-exchange').onclick = () => {
+    tabRequestBtn.click();
+    subtabBuyBtn.click();
+  };
+  document.getElementById('btn-sell-exchange').onclick = () => {
+    tabRequestBtn.click();
+    subtabSellBtn.click();
+  };
+</script>
+</body>
+</html>
